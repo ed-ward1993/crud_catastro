@@ -1,0 +1,36 @@
+# Ignorar carpetas generadas por Next.js
+/.next/
+/out/
+
+# Ignorar node_modules (dependencias)
+/node_modules/
+
+# Ignorar archivos de compilación
+*.log
+npm-debug.log*
+
+# Ignorar archivos de configuración locales
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignorar archivos de caché
+/.pnp/
+.pnp.js
+
+# Ignorar archivos temporales
+*.tmp
+*.bak
+
+# Ignorar archivos de construcción de TypeScript
+*.tsbuildinfo
+
+# Ignorar archivos de respaldo de Visual Studio Code
+/.vscode/
+
+# Ignorar archivos de almacenamiento local de IDE
+/.idea/
+
+# Ignorar archivos de respaldo de Emacs
+*~

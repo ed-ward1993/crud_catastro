@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    .letra_header {
+      @apply text-sm font-semibold leading-6 text-white;      
+    }
+    .centrar{
+      @apply flex items-center justify-center
+  }
+
+}
