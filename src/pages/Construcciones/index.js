@@ -396,7 +396,9 @@ const index = () => {
                                                     {construc.direccion_construccion}
                                                 </td>
                                                 <td className="whitespace-nowrap border-r px-6 py-4">
-                                                    {construc.id_tipo_construccion.nombre}
+                                                <td className="whitespace-nowrap border-r px-6 py-4">
+                                                {construc.id_tipo_construccion?.nombre}
+                                                </td>
                                                 </td>
                                                 <td className="whitespace-nowrap border-r px-6 py-4">
                                                    
