@@ -16,16 +16,16 @@ const index = () => {
     // Función asincrónica para obtener los datos de la API
     const fetchData = async () => {
         try {
-            const limit = 10; // Número de elementos por página
-            const offset = (currentPage - 1) * limit;
-            // const response = await axios.get('http://localhost:9000/listTerreno');
-            const response = await axios.get(`https://api.escuelajs.co/api/v1/products?limit=${limit}&offset=${offset}`);
+            // const limit = 10; // Número de elementos por página
+            // const offset = (currentPage - 1) * limit;
+            const response = await axios.get('http://localhost:9000/listPredio');  
+            console.log('--->',response.data);
             setPredios(response.data);
 
             // Calcular el número total de páginas
-            const totalElements = response.data.meta.total; // Total de elementos disponibles en la API
-            const calculatedTotalPages = Math.ceil(totalElements / limit); // Redondear hacia arriba para obtener el número total de páginas
-            setTotalPages(calculatedTotalPages);
+            // const totalElements = response.data.meta.total; // Total de elementos disponibles en la API
+            // const calculatedTotalPages = Math.ceil(totalElements / limit); // Redondear hacia arriba para obtener el número total de páginas
+            // setTotalPages(calculatedTotalPages);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -43,8 +43,43 @@ const index = () => {
             }
         };
 
+        const getPropietarios = async () => {
+            try {            
+                const response = await axios.get('http://localhost:9000/listPropietario');
+                console.log(response.data);
+                setAllPropietarios(response.data);
+                const initialValues = [];
+                setselectedPropietarios(initialValues);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        const getContrucciones = async () => {
+            try {            
+                const response = await axios.get('http://localhost:9000/listContruccion');
+                console.log(response.data);
+                setAllContrucciones(response.data);
+                const initialValues = [];
+                setselectedContrucciones(initialValues);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        const handleChangePropietarios = (selectedOptions) => {
+            const selectedPropietarioIDs = selectedOptions.map((option) => option.id);
+            setFormState({ ...formState, id_propietario: selectedPropietarioIDs });
+        };
+
     const [allTerreno, setAllTerreno] = useState([]);
-    const [selectedTerreno, setselectedTerreno] = useState([]);
+    const [selectedPropietarios, setselectedTerreno] = useState([]);
+
+    const [allPropietarios, setAllPropietarios] = useState([]);
+    const [selectedTerreno, setselectedPropietarios] = useState([]);
+
+    const [allContrucciones, setAllContrucciones] = useState([]);
+    const [selectedContrucciones, setselectedContrucciones] = useState([]);
 
     const [predios, setPredios] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -55,15 +90,19 @@ const index = () => {
     const [listado, setListado] = useState(true);
     const [operation, setOperation] = useState(1);
 
-    const openModal = (op, id, nombre, avaluo, departamento, municipio, id_construccion, id_terreno) => {
+    const openModal = (op, numero_predial, avaluo, nombre,  departamento, municipio,id_propietario, id_construccion, id_terreno) => {
         setFormulario(true);
         setListado(false);
         setOperation(op);
 
-        console.log('ID:', id);
+        console.log('ID:', numero_predial);
         console.log('Nombre:', nombre);
         console.log('Avaluo:', avaluo);
         console.log('Departamento:', departamento);
+        console.log('municipio:', municipio);
+        console.log('id_propietario:', id_propietario);
+        console.log('id_construccion:', id_construccion);
+        console.log('id_terreno:', id_terreno);
 
         if (op === 1) {
           setFormState({
@@ -72,16 +111,18 @@ const index = () => {
             nombre: "",
             departamento: "",
             municipio: "",
-            id_construccion: "",
-            id_terreno: ""
+            id_propietario:[],
+            id_construccion: [],
+            id_terreno: []
           });
         } else {
           setFormState({
-            id: id,
-            nombre: nombre,
+            numero_predial: numero_predial,
             avaluo: avaluo,
+            nombre: nombre,
             departamento: departamento,
             municipio: municipio,
+            id_propietario : id_propietario,
             id_construccion: id_construccion,
             id_terreno: id_terreno
           });
@@ -97,9 +138,9 @@ const index = () => {
         nombre: "",
         departamento: "",
         municipio: "",
-        id_construccion: "",
-        id_propietario:"",
-        id_terreno: ""
+        id_propietario:[],
+        id_construccion: [],
+        id_terreno: []
     });
 
     const [formSuccess, setFormSuccess] = useState(false)
@@ -118,25 +159,37 @@ const index = () => {
 
     // funcion para agregar y editar 
     const addPredio = () => {
-        const apiUrl = 'https://api.escuelajs.co/api/v1/products';
+        const apiUrl = 'http://localhost:9000/updatePredio';
       
+        let construcciones=[];
+        for(let i=0; i<=allContrucciones.length-1; i++){
+            if (formState.id_construccion == allContrucciones[i].id_construccion) {
+                // console.log('aqui---<',JSON.stringify(allContrucciones[i])); 
+                construcciones.push(allContrucciones[i]) ;            
+            }
+            }
+            let propietarios=[];
+        for(let i=0; i<=allPropietarios.length-1; i++){
+            if (formState.id_propietario == allPropietarios[i].id_propietario) {
+                // console.log('aqui---<',JSON.stringify(allPropietarios[i])); 
+                propietarios.push(allPropietarios[i]) ;            
+            }
+            }
+         
+
         const newPredio = {
-                numero_predial: formState.numero_predial,
                 avaluo: formState.avaluo,
                 nombre: formState.nombre,
                 departamento: formState.departamento,
                 municipio: formState.municipio,
-                id_construccion:  {
-                    "id": formState.id_construccion
-                  }, 
-                id_propietario:  {
-                "id": formState.id_propietario
-                }, 
-                id_terreno:  {
-                    "id": formState.id_terreno
-                  },
-                estado : true,
-        };
+                estado : true,                 
+                terreno:  {
+                    "id_terreno": formState.id_terreno
+                  }, construcciones,                 
+                  propietarios,
+        }
+        ;
+        console.log('Datos enviados en la petición:', JSON.stringify(newPredio)); 
       
         axios
           .post(apiUrl, newPredio)
@@ -173,24 +226,33 @@ const index = () => {
       };
       
       const editPredio = () => {
-        const apiUrl = `https://api.escuelajs.co/api/v1/products/${productId}`;
+        const apiUrl = `http://localhost:9000/updatePredio`;
+        let construcciones=[];
+        for(let i=0; i<=allContrucciones.length-1; i++){
+            if (formState.id_construccion == allContrucciones[i].id_construccion) {
+                // console.log('aqui---<',JSON.stringify(allContrucciones[i])); 
+                construcciones.push(allContrucciones[i]) ;            
+            }
+            }
+            let propietarios=[];
+        for(let i=0; i<=allPropietarios.length-1; i++){
+            if (formState.id_propietario == allPropietarios[i].id_propietario) {
+                // console.log('aqui---<',JSON.stringify(allPropietarios[i])); 
+                propietarios.push(allPropietarios[i]) ;            
+            }
+            }
       
         const updatedPredio = {
             numero_predial: formState.numero_predial,
             avaluo: formState.avaluo,
-            nombre: formState.nombre,
-            departamento: formState.departamento,
-            municipio: formState.municipio,
-            id_construccion:  {
-                "id": formState.id_construccion
-                }, 
-            id_propietario:  {
-            "id": formState.id_propietario
-            }, 
-            id_terreno:  {
-                "id": formState.id_terreno
-                },
-            estado : true,
+                nombre: formState.nombre,
+                departamento: formState.departamento,
+                municipio: formState.municipio,
+                estado : true,                 
+                terreno:  {
+                    "id_terreno": formState.id_terreno
+                  }, construcciones,                 
+                  propietarios,
         };
       
     console.log('Datos enviados en la petición:', updatedPredio);          
@@ -253,28 +315,39 @@ const index = () => {
         showConfirmationDialog(); // Muestra el cuadro de diálogo de confirmación antes de agregar o editar el producto
       };
 
-      const inactivar = ( id, nombre, avaluo, departamento, municipio, id_construccion, id_terreno) => {
+      const inactivar = ( numero_predial, avaluo, nombre,  departamento, municipio,id_propietario, id_construccion, id_terreno) => {
 
-        const apiUrl = `http://localhost:9000/deleteTerreno`;
+        const apiUrl = `http://localhost:9000/deletePredio`;
+
+        let construcciones=[];
+        for(let i=0; i<=allContrucciones.length-1; i++){
+            if (id_construccion == allContrucciones[i].id_construccion) {
+                // console.log('aqui---<',JSON.stringify(allContrucciones[i])); 
+                construcciones.push(allContrucciones[i]) ;            
+            }
+            }
+            let propietarios=[];
+        for(let i=0; i<=allPropietarios.length-1; i++){
+            if (id_propietario == allPropietarios[i].id_propietario) {
+                // console.log('aqui---<',JSON.stringify(allPropietarios[i])); 
+                propietarios.push(allPropietarios[i]) ;            
+            }
+            }
   
         const deletePredio = {
-             numero_predial: formState.numero_predial,
-            avaluo: formState.avaluo,
-            nombre: formState.nombre,
-            departamento: formState.departamento,
-            municipio: formState.municipio,
-            id_construccion:  {
-                "id": formState.id_construccion
-                }, 
-            id_propietario:  {
-            "id": formState.id_propietario
-            }, 
-            id_terreno:  {
-                "id": formState.id_terreno
-                },
-            estado : false,
+            numero_predial: numero_predial,
+            avaluo: avaluo,
+                nombre: nombre,
+                departamento: departamento,
+                municipio: municipio,
+                estado : false,                 
+                terreno:  {
+                    "id_terreno": id_terreno
+                  }, construcciones,                 
+                  propietarios,
+            
     };
-    console.log('Datos enviados en la petición:', deletePredio);          
+    console.log('Datos enviados en la petición:', JSON.stringify(deletePredio));          
 
 
     Swal.fire({
@@ -291,14 +364,14 @@ const index = () => {
     axios
     .post(apiUrl, deletePredio)
     .then((response) => {
-      console.log('Predio actualizado exitosamente:', response.data);
+      console.log('Predio eliminado exitosamente:', response.data);
     
       setFormSuccess(true);
       setFormSuccessMessage('Predio eliminado exitosamente.');
       setFormulario(false);
       setListado(true);
       setPredios((prevPredios) =>
-        prevPredios.filter((predio) => predio.id !== id)
+        prevPredios.filter((predio) => predio.numero_predial !== numero_predial)
       );
     })
     .catch((error) => {
@@ -326,6 +399,8 @@ const index = () => {
     useEffect(() => {
         fetchData();
         getTerreno();
+        getPropietarios();
+        getContrucciones();
     }, [currentPage]);
 
     const handleNextPage = () => {
@@ -373,8 +448,7 @@ const index = () => {
                             <div className='max-w-full mx-auto  mb-6'>
                                 <button onClick={() => openModal(1)}
                                     className="w-32 px-6 py-3 rounded bg-[#01356A] text-white text-sm font-bold whitespace-nowrap hover:bg-[#001E41] focus:bg-[#001E41] focus:outline-none"
-                                    preserveScroll={true}
-                                    preserveState={true}>
+                                    >
                                     Nuevo Predio
                                 </button>
                             </div>
@@ -383,9 +457,7 @@ const index = () => {
                                 <table className="w-full border text-center text-base font-semibold table-auto whitespace-nowrap">
                                     <thead className="border-t font-medium border-2 border-grey-900">
                                         <tr className="font-bold text-left bg-gray-100">
-                                            <th scope="col" className="border-r px-6 pt-5 pb-4">
-                                                #
-                                            </th>
+                                            
                                             <th scope="col" className="border-r px-6 pt-5 pb-4">
                                                 Numero Predial
                                             </th>
@@ -402,9 +474,16 @@ const index = () => {
                                                 Municipio
                                             </th>
                                             <th scope="col" className="border-r px-6 pt-5 pb-4">
+                                                Propietarios
+                                            </th> 
+                                            <th scope="col" className="border-r px-6 pt-5 pb-4">
                                                 Contruccion
-                                            </th> <th scope="col" className="border-r px-6 pt-5 pb-4">
+                                            </th> 
+                                            <th scope="col" className="border-r px-6 pt-5 pb-4">
                                                 Terreno
+                                            </th>
+                                            <th scope="col" className="border-r px-6 pt-5 pb-4">
+                                                Estado
                                             </th>
                                             <th scope="col" className="border-r px-6 pt-5 pb-4">
                                                 Action
@@ -414,40 +493,40 @@ const index = () => {
                                     </thead>
                                     <tbody className='text-left'>
                                         {predios.map((predio, index) => (
-                                            <tr key={predio.id} className="hover:bg-gray-50 focus-within:bg-gray-100">
-                                                <td className="whitespace-nowrap border-r px-6 py-4">
+                                            <tr key={predio.numero_predial} className="hover:bg-gray-50 focus-within:bg-gray-100">
+                                                <td className="whitespace-nowrap border-r px-6 py-4 centrar">
                                                     {/* {index + 1} */}
-                                                    {predio.id}
+                                                    {predio.numero_predial}
                                                 </td>
                                                 <th scope="row" className="px-6 py-4 font-medium border-r  text-blue-900 whitespace-nowrap ">
-                                                    {predio.title}
+                                                    {predio.avaluo}
                                                 </th>
                                                 <td className="whitespace-nowrap border-r px-6 py-4">
-                                                    {predio.price}
+                                                    {predio.nombre}
                                                 </td>
                                                
                                                 <td className="whitespace-nowrap border-r px-6 py-4">
-                                                    {predio.creationAt}
+                                                    {predio.departamento}
                                                 </td>
                                                 <td className="whitespace-nowrap border-r px-6 py-4">
-                                                    {predio.updatedAt}
+                                                    {predio.municipio}
                                                 </td>
                                                 <td className="whitespace-nowrap border-r px-6 py-4">
-                                                    {predio.category.name}
+                                                {predio.propietarios[0] ? predio.propietarios[0].id_propietario : 'N/A'}
                                                 </td>
                                                 <td className="whitespace-nowrap border-r px-6 py-4">
-                                                    {predio.category.creationAt}
+                                                {predio.construcciones[0] ? predio.construcciones[0].id_construccion : 'N/A'}
                                                 </td>
                                                 <td className="whitespace-nowrap border-r px-6 py-4">
-                                                    {predio.category.updatedAt}
+                                                    {predio.terreno.area}
                                                 </td>
                                                 <td className="whitespace-nowrap border-r px-6 py-4">
-                                                    {predio.category.updatedAt}
-                                                    {/* {predio.estado == true ? (
+                                                    
+                                                    {predio.estado == true ? (
                                                             <p>Activo</p>
                                                         ) : (
                                                             <p>Inactivo</p>
-                                                        )} */}
+                                                        )}
                                                 </td>
                                                 <td className="whitespace-nowrap border-r px-3 py-2 space-x-2 centrar">
 
@@ -455,30 +534,34 @@ const index = () => {
                                                         <TableButton
                                                             className='bg-[#026882] hover:bg-[#003442] p-1 '
                                                             onClick={() => openModal(2,
-                                                                predio.id,
-                                                                predio.title,
-                                                                predio.price,
-                                                                predio.title,
+                                                                predio.numero_predial,
+                                                                predio.avaluo,
+                                                                predio.nombre,
+                                                                predio.departamento,
                                                                 predio.municipio,
-                                                                predio.id_construccion,
-                                                                predio.id_terreno
+                                                                predio.propietarios[0] ? predio.propietarios[0].id_propietario : 'N/A',
+                                                                predio.construcciones[0] ? predio.construcciones[0].id_construccion : 'N/A',
+                                                                predio.terreno.id_terreno
                                                             )}>
                                                             <div className='w-6 h-6  '>
                                                                 <Icon className="w-6 h-6 text-white fill-current group-hover:text-gray-300 focus:text-gray-600 " name="edit" />
                                                             </div>
                                                         </TableButton>
                                                     </div>
-                                                    {/* {predio.estado == true ? (
+                                                    {predio.estado == true ? (
                                                             <div className='w-8 h-8'>
                                                                 <TableButton
                                                                     className='bg-[#CB0E28] hover:bg-[#AE0C22] p-1 '
                                                                     onClick={() => inactivar( 
-                                                                        predio.id,
-                                                                        predio.area,
-                                                                        predio.valor_comercial,
-                                                                        predio.cerca_fuentes_agua,
-                                                                        predio.tiene_construcciones,
-                                                                        predio.tipo_predio.id)}>
+                                                                        predio.numero_predial,
+                                                                        predio.avaluo,
+                                                                        predio.nombre,
+                                                                        predio.departamento,
+                                                                        predio.municipio,
+                                                                        predio.propietarios[0] ? predio.propietarios[0].id_propietario : 'N/A',
+                                                                        predio.construcciones[0] ? predio.construcciones[0].id_construccion : 'N/A',
+                                                                        predio.terreno.id_terreno
+                                                                        )}>
                                                                     <div className='w-6 h-6  '>
                                                                         <Icon className="w-6 h-6 text-white fill-current group-hover:text-gray-300 focus:text-gray-600 " name="trash" />
                                                                     </div>
@@ -488,7 +571,7 @@ const index = () => {
                                                             <div>
                                                                 
                                                             </div>
-                                                        )} */}
+                                                        )}
                                                 </td>
                                             </tr>
                                         ))}
@@ -531,7 +614,8 @@ const index = () => {
                                         operation === 2) && (
                                             <div className='w-full p-2 grid grid-cols-6 gap-2'>
                                                 <p className="hidden">{operation}</p>
-                                                <div className=" px-3 lg:col-span-2 col-span-6 mb-3">
+                                                {(operation === 2) && (
+                                                    <div className=" px-3 lg:col-span-2 col-span-6 mb-3">
                                                 <InputLabel
                                                     forInput="numero_predial"
                                                     value="Numero Predial"
@@ -545,8 +629,11 @@ const index = () => {
                                                     value={formState.numero_predial}
                                                     onChange={handleInput}
                                                     placeholder="Ingrese número predial "
+                                                    disabled
                                                 />
                                             </div>
+                                                )}
+                                                
                                             <div className=" px-3 lg:col-span-2 col-span-6 mb-3">
                                                 <InputLabel
                                                     forInput="avaluo"
@@ -617,21 +704,39 @@ const index = () => {
                                                 </div>
                                                 <div className="px-3 lg:col-span-2 col-span-6 mb-3" >
                                                 <InputLabel
+                                                    forInput="propietarios"
+                                                    value="Propietarios"
+                                                    className="text-sm font-medium"
+                                                />
+                                                <DynamicSelect
+                                                    multiple={false}
+                                                    withIcons={true}
+                                                    options={allPropietarios}
+                                                    value={formState.id_propietario} 
+                                                    valueKey="id_propietario"
+                                                    labelKey="razon_social"
+                                                    onChange={(selectedOption) => setFormState({ ...formState, id_propietario: selectedOption.id_propietario })}
+                                                    className="mb-5 h-36"
+                                                />                                                  
+                                            </div>
+                                                <div className="px-3 lg:col-span-2 col-span-6 mb-3" >
+                                                <InputLabel
                                                     forInput="construcciones"
                                                     value="Construcciones"
                                                     className="text-sm font-medium"
                                                 />
                                                 <DynamicSelect
-                                                    multiple={true}
+                                                    multiple={false}
                                                     withIcons={true}
-                                                    // options={listadoContruccion}
-                                                    // value={formState.id_construccion}
-                                                    // valueKey="id"
-                                                    // labelKey="nombre"
-                                                    // onChange={getSelectedConstruccion}
+                                                    options={allContrucciones}
+                                                    value={formState.id_construccion}
+                                                    valueKey="id_construccion"
+                                                    labelKey="direccion_construccion"
+                                                    onChange={(selectedOption) => setFormState({ ...formState, id_construccion: selectedOption.id_construccion })}
                                                     className="mb-5 h-36"
                                                 />                                                  
                                             </div>
+                                            
                                             <div className="px-3 lg:col-span-2 col-span-6 mb-3" >
                                                 <InputLabel
                                                     forInput="terreno"
@@ -639,13 +744,13 @@ const index = () => {
                                                     className="text-sm font-medium"
                                                 />
                                                 <DynamicSelect
-                                                    multiple={true}
+                                                    multiple={false}
                                                     withIcons={true}
                                                     options={allTerreno}
                                                     value={formState.id_terreno}
-                                                    valueKey="id"
+                                                    valueKey="id_terreno"
                                                     labelKey="id_terreno"
-                                                    onChange={(selectedOption) => setFormState({ ...formState, id_terreno: selectedOption.id })}
+                                                    onChange={(selectedOption) => setFormState({ ...formState, id_terreno: selectedOption.id_terreno })}
                                                     className="mb-5 h-36"
                                                 />
                                                   

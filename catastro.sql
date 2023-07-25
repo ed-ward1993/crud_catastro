@@ -31,13 +31,9 @@ CREATE TABLE Tipo_terreno (
   estado BOOLEAN DEFAULT true
 );
 
--- Creación de la secuencia para la columna id
-CREATE SEQUENCE predio_id_seq;
-
 -- Creación de la tabla Predio con numero_predial como llave primaria y id como llave primaria incremental adicional
 CREATE TABLE Predio (
-  id INT DEFAULT nextval('predio_id_seq'),
-  numero_predial INT PRIMARY KEY,
+  numero_predial SERIAL PRIMARY KEY,
   avaluo DECIMAL(10, 2),
   nombre VARCHAR(255),
   departamento VARCHAR(255),
@@ -88,9 +84,9 @@ CREATE TABLE PropietarioPredio (
 -- Creación de la tabla ConstruccionPredio para representar la relación muchos a muchos entre Construcciones y Predio
 CREATE TABLE ConstruccionPredio (
   id_construccion_predio SERIAL PRIMARY KEY,
-  id_predio INT,
+  numero_predial INT,
   id_construccion INT,
-  FOREIGN KEY (id_predio) REFERENCES Predio (numero_predial),
+  FOREIGN KEY (numero_predial) REFERENCES Predio (numero_predial),
   FOREIGN KEY (id_construccion) REFERENCES Construccion (id_construccion)
 );
 
@@ -175,16 +171,16 @@ VALUES
 
   INSERT INTO Predio (numero_predial, avaluo, nombre, departamento, municipio, estado,id_terreno)
 VALUES
-  (1001, 50000.00, 'Predio 1', 'Departamento 1', 'Municipio 1', true,3),
-  (1002, 75000.00, 'Predio 2', 'Departamento 2', 'Municipio 2', true,4),
-  (1003, 120000.00, 'Predio 3', 'Departamento 1', 'Municipio 3', true,2),
-  (1004, 90000.00, 'Predio 4', 'Departamento 3', 'Municipio 4', true,5),
-  (1005, 65000.00, 'Predio 5', 'Departamento 2', 'Municipio 5', true,1);
+  (1, 50000.00, 'Predio 1', 'Departamento 1', 'Municipio 1', true,3),
+  (2, 75000.00, 'Predio 2', 'Departamento 2', 'Municipio 2', true,4),
+  (3, 120000.00, 'Predio 3', 'Departamento 1', 'Municipio 3', true,2),
+  (4, 90000.00, 'Predio 4', 'Departamento 3', 'Municipio 4', true,5),
+  (5, 65000.00, 'Predio 5', 'Departamento 2', 'Municipio 5', true,1);
   
 
  
-SELECT MAX(id) FROM Predio;
-ALTER SEQUENCE predio_id_seq RESTART WITH 6;
+SELECT MAX(numero_predial) FROM Predio;
+ALTER SEQUENCE predio_numero_predial_seq RESTART WITH 6;
 
 SELECT MAX(id_propietario) FROM propietario p;
 ALTER SEQUENCE propietario_id_propietario_seq RESTART WITH 6;
